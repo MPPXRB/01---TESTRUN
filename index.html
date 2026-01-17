@@ -13,6 +13,24 @@
         background: #f6f6f6;
         font-family: "Georgia", "Times New Roman", serif;
       }
+      .toolbar {
+        width: 1500px;
+        margin: 24px auto 0;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .toolbar button {
+        border: 1px solid #111111;
+        background: #ffffff;
+        color: #111111;
+        padding: 8px 16px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .toolbar button:hover {
+        background: #111111;
+        color: #ffffff;
+      }
       .frame {
         width: 1500px;
         height: 1500px;
@@ -26,28 +44,44 @@
           width: 95vw;
           height: 95vw;
         }
+        .toolbar {
+          width: 95vw;
+        }
       }
     </style>
   </head>
   <body>
+    <div class="toolbar">
+      <button id="clear-btn" type="button">Clear</button>
+    </div>
     <canvas id="board" class="frame" width="1500" height="1500"></canvas>
     <script>
       const canvas = document.getElementById("board");
       const ctx = canvas.getContext("2d");
-      const point = { x: 750, y: 750, r: 6 };
-      let dragging = false;
-      let dragOffset = { x: 0, y: 0 };
+      const clearButton = document.getElementById("clear-btn");
+      const points = [];
+      const pointRadius = 6;
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#111111";
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, point.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
 
-      function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
+        if (points.length > 1) {
+          ctx.strokeStyle = "#111111";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          for (let i = 1; i < points.length; i += 1) {
+            ctx.lineTo(points[i].x, points[i].y);
+          }
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "#111111";
+        for (const point of points) {
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, pointRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       function getCanvasScale() {
@@ -60,30 +94,17 @@
         };
       }
 
-      canvas.addEventListener("mousedown", (event) => {
+      canvas.addEventListener("click", (event) => {
         const { scaleX, scaleY, left, top } = getCanvasScale();
         const x = (event.clientX - left) * scaleX;
         const y = (event.clientY - top) * scaleY;
-        const dx = x - point.x;
-        const dy = y - point.y;
-        if (dx * dx + dy * dy <= point.r * point.r) {
-          dragging = true;
-          dragOffset = { x: x - point.x, y: y - point.y };
-        }
-      });
-
-      canvas.addEventListener("mousemove", (event) => {
-        if (!dragging) return;
-        const { scaleX, scaleY, left, top } = getCanvasScale();
-        const x = (event.clientX - left) * scaleX;
-        const y = (event.clientY - top) * scaleY;
-        point.x = clamp(x - dragOffset.x, point.r, canvas.width - point.r);
-        point.y = clamp(y - dragOffset.y, point.r, canvas.height - point.r);
+        points.push({ x, y });
         draw();
       });
 
-      window.addEventListener("mouseup", () => {
-        dragging = false;
+      clearButton.addEventListener("click", () => {
+        points.length = 0;
+        draw();
       });
 
       draw();
