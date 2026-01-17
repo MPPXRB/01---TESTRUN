@@ -17,3 +17,9 @@ desktop fallback, used to confirm local UI input and basic hosting work.
 
 ## Controls
 - Left click and drag the point
+
+## GitHub Pages
+1. Go to the repo Settings → Pages
+2. Set Source to "GitHub Actions"
+3. Push to `main` and wait for the "Deploy to GitHub Pages" workflow
+4. Your site will be live at `https://mppxrb.github.io/01---TESTRUN/`
